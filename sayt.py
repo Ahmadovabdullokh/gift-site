@@ -1,6 +1,6 @@
-# app.py
+# sayt.py
 # ПОДАРОЧНЫЙ МНОГОСТРАНИЧНЫЙ САЙТ ДЛЯ ДЕВУШКИ (Flask)
-# ИСПРАВЛЕННАЯ И УПРОЩЁННАЯ СТАБИЛЬНАЯ ВЕРСИЯ
+# СТАБИЛЬНАЯ ВЕРСИЯ + АВТОМАТИЧЕСКАЯ ДАТА
 
 from flask import Flask, render_template_string, request, session
 import random
@@ -74,11 +74,14 @@ COMFORT_TEXTS = [
 # ===================== ШАБЛОН =====================
 BASE_PAGE = """
 <!DOCTYPE html>
-<html lang="ru">
+<html lang=\"ru\">
 <head>
-<meta charset="UTF-8">
+<meta charset=\"UTF-8\">
 <title>{{ title }} | {{ site_name }}</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+<meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="0">
 <style>
 body {background: linear-gradient(135deg,#ff9a9e,#fad0c4);font-family:Arial;color:#fff;margin:0}
 nav {background:rgba(0,0,0,.3);padding:15px;text-align:center}
@@ -90,14 +93,25 @@ textarea {width:100%;padding:10px;border-radius:10px;border:none}
 </head>
 <body>
 <nav>
-<a href="/">Главная</a>
-<a href="/compliments">Комплименты</a>
-<a href="/flirt">Флирт</a>
-<a href="/comfort">Уют</a>
-<a href="/message">Сообщение</a>
-<a href="/admin">Админ</a>
+<a href=\"/\">Главная</a>
+<a href=\"/compliments\">Комплименты</a>
+<a href=\"/flirt\">Флирт</a>
+<a href=\"/comfort\">Уют</a>
+<a href=\"/message\">Сообщение</a>
+<a href=\"/admin\">Админ</a>
 </nav>
-<div class="container">{{ content|safe }}</div>
+<div class=\"container\">{{ content|safe }}</div>
+<script>
+function updateDate() {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2,'0');
+    const month = String(today.getMonth()+1).padStart(2,'0');
+    const year = today.getFullYear();
+    document.querySelectorAll('#today').forEach(span => span.textContent = `${day}.${month}.${year}`);
+}
+updateDate();
+setInterval(updateDate, 60*1000);
+</script>
 </body>
 </html>
 """
@@ -106,11 +120,10 @@ textarea {width:100%;padding:10px;border-radius:10px;border:none}
 @app.route("/")
 def index():
     quote = random.choice(COMPLIMENTS)
-    today = datetime.now().strftime('%d.%m.%Y')
     content = f"""
     <h1>Этот сайт — только для тебя 💗</h1>
     <p style='font-style:italic'>«{quote}»</p>
-    <p>Сегодня: {today}</p>
+    <p>Сегодня: <span id='today'></span></p>
     <p>Здесь можно улыбаться, флиртовать и просто чувствовать тепло 💕</p>
     """
     return render_template_string(BASE_PAGE, title="Главная", site_name=SITE_NAME, content=content)
@@ -164,3 +177,4 @@ def admin():
 # ===================== ЗАПУСК =====================
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=False)
+
